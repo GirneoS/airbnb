@@ -29,7 +29,7 @@ public class DefaultJwtService implements JwtService {
 
     private final BlacklistService tokenBlacklistService;
 
-    @Value("${airbnb.jwt.secret}")
+    @Value("${airbnb.jwt.secret:3ffb5064704f3949ce6aa5e7e811d0e5eccd53e45785ebd86576ef0e1cdb1c95}")
     private String jwtSecret;
 
     @Value("${airbnb.jwt.access-token.expiration:15m}")

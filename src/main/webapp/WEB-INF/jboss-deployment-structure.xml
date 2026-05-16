@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jboss-deployment-structure>
+    <deployment>
+        <exclude-subsystems>
+            <subsystem name="jpa"/>
+            <subsystem name="jsf"/>
+        </exclude-subsystems>
+        <exclusions>
+            <module name="org.hibernate"/>
+            <module name="org.hibernate.validator"/>
+            <module name="javax.persistence.api"/>
+        </exclusions>
+    </deployment>
+</jboss-deployment-structure>
