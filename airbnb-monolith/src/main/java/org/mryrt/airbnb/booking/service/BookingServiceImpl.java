@@ -1,11 +1,15 @@
 package org.mryrt.airbnb.booking.service;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.mryrt.airbnb.auth.service.user.UserService;
+import org.mryrt.airbnb.bitrix.service.BitrixService;
 import org.mryrt.airbnb.booking.access.BookingAccessService;
 import org.mryrt.airbnb.booking.dto.BookingDto;
 import org.mryrt.airbnb.booking.dto.BookingMapper;
@@ -41,6 +45,7 @@ import static org.mryrt.airbnb.exception.message.GlobalErrorMessage.SOURCE_WITH_
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class BookingServiceImpl implements BookingService {
 
     private final BookingRepository bookingRepository;
@@ -51,6 +56,7 @@ public class BookingServiceImpl implements BookingService {
     private final PageableFactory pageableFactory;
     private final ApplicationEventPublisher eventPublisher;
     private final NotificationService notificationService;
+    private final BitrixService bitrixService;
 
     private Booking findBooking(Long id) {
         if (id == null) throw new ServiceException(MUST_BE_NOT_NULL, "Booking.id");
@@ -66,12 +72,16 @@ public class BookingServiceImpl implements BookingService {
             throw new ServiceException(BOOKING_CHECK_OUT_AFTER_CHECK_IN);
         }
         Listing listing = listingService.getEntity(request.getListingId());
+        if (listing.getPricePerNight() == null) {
+            throw new ServiceException(MUST_BE_NOT_NULL, "Listing.pricePerNight");
+        }
         Long guestId = userService.getAuthenticatedUser().getId();
         if (bookingRepository.existsOverlappingByGuestAndListing(guestId, request.getListingId(),
                 request.getCheckInDate(), request.getCheckOutDate(),
                 List.of(BookingStatus.APPLIED, BookingStatus.APPROVED, BookingStatus.CHECKED_IN))) {
             throw new ServiceException(BOOKING_GUEST_OVERLAPPING_DATES);
         }
+        long nights = ChronoUnit.DAYS.between(request.getCheckInDate(), request.getCheckOutDate());
         Booking booking = Booking.builder()
                 .listingId(request.getListingId())
                 .guestId(guestId)
@@ -79,8 +89,17 @@ public class BookingServiceImpl implements BookingService {
                 .checkOutDate(request.getCheckOutDate())
                 .status(BookingStatus.APPLIED)
                 .appliedAt(LocalDateTime.now())
+                .totalPrice(listing.getPricePerNight().multiply(BigDecimal.valueOf(nights)))
                 .build();
-        BookingDto dto = mapper.toDto(bookingRepository.save(booking));
+        booking = bookingRepository.save(booking);
+        try {
+            long dealId = bitrixService.createBookingDeal(booking, listing, userService.getEntity(guestId));
+            booking.setBitrixDealId(dealId);
+            booking = bookingRepository.save(booking);
+        } catch (Exception exception) {
+            log.warn("Failed to create Bitrix24 deal for booking {}: {}", booking.getId(), exception.getMessage());
+        }
+        BookingDto dto = mapper.toDto(booking);
         eventPublisher.publishEvent(new EntityEvent<>(CREATED, dto));
         notificationService.notifyUser(listing.getOwnerId(), NotificationType.BOOKING_APPLIED,
                 Map.of("listingId", listing.getId(), "bookingId", dto.getId()));
@@ -123,12 +142,15 @@ public class BookingServiceImpl implements BookingService {
                     booking.getListingId(), booking.getCheckInDate(), booking.getCheckOutDate(), id);
             for (Booking other : overlapping) {
                 other.setStatus(BookingStatus.REJECTED);
-                bookingRepository.save(other);
+                other = bookingRepository.save(other);
+                updateBitrixDeal(other);
                 notificationService.notifyUser(other.getGuestId(), NotificationType.BOOKING_REJECTED_ANOTHER_APPROVED,
                         Map.of("bookingId", other.getId(), "listingId", other.getListingId()));
             }
         }
-        BookingDto dto = mapper.toDto(bookingRepository.save(booking));
+        booking = bookingRepository.save(booking);
+        updateBitrixDeal(booking);
+        BookingDto dto = mapper.toDto(booking);
         eventPublisher.publishEvent(new EntityEvent<>(UPDATED, dto));
         if (request.getStatus() == BookingStatus.APPROVED) {
             notificationService.notifyUser(booking.getGuestId(), NotificationType.BOOKING_APPROVED,
@@ -152,6 +174,7 @@ public class BookingServiceImpl implements BookingService {
         booking.setStatus(BookingStatus.CHECKED_IN);
         booking.setCheckInAt(LocalDateTime.now());
         booking = bookingRepository.save(booking);
+        updateBitrixDeal(booking);
         notificationService.notifyUser(listing.getOwnerId(), NotificationType.BOOKING_CHECKED_IN,
                 Map.of("bookingId", id));
         return mapper.toDto(booking);
@@ -168,7 +191,9 @@ public class BookingServiceImpl implements BookingService {
         Listing listing = listingService.getEntity(booking.getListingId());
         booking.setStatus(BookingStatus.CHECKED_OUT);
         booking.setCheckOutAt(LocalDateTime.now());
-        BookingDto dto = mapper.toDto(bookingRepository.save(booking));
+        booking = bookingRepository.save(booking);
+        updateBitrixDeal(booking);
+        BookingDto dto = mapper.toDto(booking);
         eventPublisher.publishEvent(new EntityEvent<>(UPDATED, dto));
         notificationService.notifyUser(listing.getOwnerId(), NotificationType.BOOKING_CHECKED_OUT,
                 Map.of("bookingId", id));
@@ -180,5 +205,14 @@ public class BookingServiceImpl implements BookingService {
     @Transactional(readOnly = true)
     public Booking getEntity(Long id) {
         return findBooking(id);
+    }
+
+    private void updateBitrixDeal(Booking booking) {
+        try {
+            bitrixService.updateBookingDeal(booking);
+        } catch (Exception exception) {
+            log.warn("Failed to update Bitrix24 deal {} for booking {}: {}",
+                    booking.getBitrixDealId(), booking.getId(), exception.getMessage());
+        }
     }
 }

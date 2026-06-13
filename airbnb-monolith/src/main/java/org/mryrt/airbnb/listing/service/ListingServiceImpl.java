@@ -59,6 +59,7 @@ public class ListingServiceImpl implements ListingService {
                 .ownerId(ownerId)
                 .title(request.getTitle())
                 .description(request.getDescription())
+                .pricePerNight(request.getPricePerNight())
                 .status(ListingStatus.DRAFT)
                 .build();
         ListingDto dto = mapper.toDto(listingRepository.save(listing));
@@ -87,6 +88,7 @@ public class ListingServiceImpl implements ListingService {
         ListingStatus previousStatus = listing.getStatus();
         if (request.getTitle() != null) listing.setTitle(request.getTitle());
         if (request.getDescription() != null) listing.setDescription(request.getDescription());
+        if (request.getPricePerNight() != null) listing.setPricePerNight(request.getPricePerNight());
         if (request.getStatus() != null) listing.setStatus(request.getStatus());
         ListingDto dto = mapper.toDto(listingRepository.save(listing));
         if (request.getStatus() != null && listing.getStatus() == ListingStatus.PUBLISHED && previousStatus != ListingStatus.PUBLISHED) {

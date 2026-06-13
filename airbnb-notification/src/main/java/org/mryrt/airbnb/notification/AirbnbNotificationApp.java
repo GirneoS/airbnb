@@ -13,6 +13,7 @@ public class AirbnbNotificationApp extends SpringBootServletInitializer {
 
     @Override
     protected SpringApplicationBuilder configure(SpringApplicationBuilder builder) {
+        System.setProperty("org.springframework.boot.logging.LoggingSystem", "none");
         return builder
                 .sources(AirbnbNotificationApp.class);
     }

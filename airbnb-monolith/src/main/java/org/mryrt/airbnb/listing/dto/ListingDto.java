@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.mryrt.airbnb.listing.model.ListingStatus;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Getter
@@ -20,6 +21,7 @@ public class ListingDto {
     private Long ownerId;
     private String title;
     private String description;
+    private BigDecimal pricePerNight;
     private ListingStatus status;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

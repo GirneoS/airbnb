@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>org.mryrt</groupId>
+    <artifactId>airbnb-bitrix-ra</artifactId>
+    <version>1.0</version>
+    <packaging>rar</packaging>
+    <name>AirBnb Bitrix24 Resource Adapter</name>
+    <description>Jakarta Connectors Resource Adapter for Bitrix24 CRM</description>
+
+    <properties>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+    <dependencies>
+        <!-- API interfaces are bundled so IronJacamar and the WAR share the same classes. -->
+        <dependency>
+            <groupId>org.mryrt</groupId>
+            <artifactId>airbnb-bitrix-api</artifactId>
+            <version>1.0</version>
+        </dependency>
+
+        <!-- JCA API — provided by WildFly -->
+        <dependency>
+            <groupId>jakarta.resource</groupId>
+            <artifactId>jakarta.resource-api</artifactId>
+            <version>2.1.0</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>2.10.1</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <!-- Create the impl JAR before rar:rar so includeJar=true can find it -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.5.1</version>
+                <executions>
+                    <execution>
+                        <id>create-impl-jar</id>
+                        <phase>prepare-package</phase>
+                        <goals><goal>jar</goal></goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-rar-plugin</artifactId>
+                <version>3.0.0</version>
+                <configuration>
+                    <includeJar>true</includeJar>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>

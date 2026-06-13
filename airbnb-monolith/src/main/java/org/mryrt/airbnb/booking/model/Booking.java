@@ -14,6 +14,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.mryrt.airbnb.model.AuditableEntity;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -56,4 +57,10 @@ public class Booking extends AuditableEntity {
 
     @Column(name = "check_out_at")
     private LocalDateTime checkOutAt;
+
+    @Column(name = "bitrix_deal_id")
+    private Long bitrixDealId;
+
+    @Column(name = "total_price", precision = 12, scale = 2)
+    private BigDecimal totalPrice;
 }

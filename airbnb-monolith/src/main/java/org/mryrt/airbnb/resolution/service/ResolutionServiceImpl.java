@@ -12,7 +12,6 @@ import org.mryrt.airbnb.listing.model.Listing;
 import org.mryrt.airbnb.listing.service.ListingService;
 import org.mryrt.airbnb.notification.NotificationService;
 import org.mryrt.airbnb.notification.NotificationType;
-import org.mryrt.airbnb.payment.service.PaymentService;
 import org.mryrt.airbnb.resolution.access.ResolutionAccessService;
 import org.mryrt.airbnb.resolution.constants.ResolutionConstants;
 import org.mryrt.airbnb.resolution.dto.ResolutionDto;
@@ -121,23 +120,11 @@ public class ResolutionServiceImpl implements ResolutionService {
         window.setAmountRequested(request.getAmountRequested());
         window.setMoneyRequestedAt(LocalDateTime.now());
 
-        try {
-            var payment = paymentService.createPayment(
-                    request.getAmountRequested(),
-                    "Resolution #" + id + " — booking #" + window.getBookingId()
-            );
-            window.setYooPaymentId(payment.getPaymentId());
-            window.setPaymentConfirmUrl(payment.getConfirmationUrl());
-        } catch (Exception e) {
-            // не блокируем основной флоу, если платёжный шлюз недоступен
-            log.warn("Payment gateway unavailable for resolution {}: {}", id, e.getMessage());
-        }
-
         window = resolutionRepository.save(window);
         Booking b = bookingService.getEntity(window.getBookingId());
         notificationService.notifyUser(b.getGuestId(), NotificationType.RESOLUTION_MONEY_REQUESTED,
                 Map.of("bookingId", window.getBookingId(), "amount", request.getAmountRequested(),
-                        "resolutionId", window.getId(), "confirmationUrl", window.getPaymentConfirmUrl()));
+                        "resolutionId", window.getId()));
         return mapper.toDto(window);
     }
 

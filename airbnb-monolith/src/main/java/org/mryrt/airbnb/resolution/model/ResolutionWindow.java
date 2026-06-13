@@ -55,9 +55,4 @@ public class ResolutionWindow extends AuditableEntity {
     @Column(length = 2000)
     private String complaintDescription;
 
-    @Column(name = "yoo_payment_id")
-    private String yooPaymentId;
-
-    @Column(name = "payment_confirm_url", length = 500)
-    private String paymentConfirmUrl;
 }

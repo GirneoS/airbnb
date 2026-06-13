@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<connector xmlns="https://jakarta.ee/xml/ns/jakartaee"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee
+               https://jakarta.ee/xml/ns/jakartaee/connector_2_0.xsd"
+           version="2.0">
+
+    <vendor-name>AirBnb</vendor-name>
+    <eis-type>Bitrix24 CRM</eis-type>
+    <resourceadapter-version>1.0</resourceadapter-version>
+
+    <resourceadapter>
+        <resourceadapter-class>
+            org.mryrt.airbnb.bitrix.ra.impl.BitrixResourceAdapter
+        </resourceadapter-class>
+
+        <outbound-resourceadapter>
+            <connection-definition>
+                <managedconnectionfactory-class>
+                    org.mryrt.airbnb.bitrix.ra.impl.BitrixManagedConnectionFactory
+                </managedconnectionfactory-class>
+                <connectionfactory-interface>
+                    org.mryrt.airbnb.bitrix.ra.api.BitrixConnectionFactory
+                </connectionfactory-interface>
+                <connectionfactory-impl-class>
+                    org.mryrt.airbnb.bitrix.ra.impl.BitrixConnectionFactoryImpl
+                </connectionfactory-impl-class>
+                <connection-interface>
+                    org.mryrt.airbnb.bitrix.ra.api.BitrixConnection
+                </connection-interface>
+                <connection-impl-class>
+                    org.mryrt.airbnb.bitrix.ra.impl.BitrixConnectionImpl
+                </connection-impl-class>
+            </connection-definition>
+            <transaction-support>NoTransaction</transaction-support>
+            <reauthentication-support>false</reauthentication-support>
+        </outbound-resourceadapter>
+    </resourceadapter>
+</connector>

@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.mryrt.airbnb.booking.model.BookingStatus;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -26,6 +27,8 @@ public class BookingDto {
     private LocalDateTime appliedAt;
     private LocalDateTime checkInAt;
     private LocalDateTime checkOutAt;
+    private Long bitrixDealId;
+    private BigDecimal totalPrice;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private Long version;

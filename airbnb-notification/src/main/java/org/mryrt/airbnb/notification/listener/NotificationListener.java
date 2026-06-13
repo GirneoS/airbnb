@@ -13,10 +13,11 @@ public class NotificationListener {
     private final NotificationService notificationService;
 
     @JmsListener(
-            destination = "${airbnb.jms.queue.name:java:/jms/queue/NotificationQueue}",
+            destination = "${airbnb.jms.queue.name:NotificationQueue}",
             containerFactory = "jmsListenerContainerFactory"
     )
     public void onMessage(EmailMessage message) {
+        System.out.println("got message: " + message.title());
         notificationService.send(message.email(), message.title(), message.body());
     }
 }

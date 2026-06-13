@@ -14,6 +14,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.mryrt.airbnb.model.AuditableEntity;
 
+import java.math.BigDecimal;
+
 @Entity
 @Table(name = "listings")
 @Data
@@ -34,6 +36,9 @@ public class Listing extends AuditableEntity {
 
     @Column(length = 2000)
     private String description;
+
+    @Column(name = "price_per_night", precision = 12, scale = 2)
+    private BigDecimal pricePerNight;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

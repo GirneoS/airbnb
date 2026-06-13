@@ -3,8 +3,6 @@ package org.mryrt.airbnb.notification;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.mryrt.airbnb.auth.service.user.UserService;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.jms.core.JmsTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
@@ -14,18 +12,15 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class NotificationServiceImpl implements NotificationService {
 
-    private final JmsTemplate jmsTemplate;
+    private final StompNotificationSender stompSender;
     private final UserService userService;
-
-    @Value("${airbnb.jms.queue.name:NotificationQueue}")
-    private String queueName;
 
     @Override
     public void notifyUser(Long userId, NotificationType type, Map<String, Object> context) {
         try {
             String email = userService.getEntity(userId).getEmail();
             Content content = buildContent(type, context);
-            jmsTemplate.convertAndSend(queueName, new NotificationPayload(email, content.title(), content.body()));
+            stompSender.send(new NotificationPayload(email, content.title(), content.body()));
             log.debug("Notification {} queued for user {}", type, userId);
         } catch (Exception e) {
             log.warn("Failed to queue notification {} for user {}: {}", type, userId, e.getMessage());
@@ -39,7 +34,6 @@ public class NotificationServiceImpl implements NotificationService {
         Object listingId    = ctx != null ? ctx.get("listingId")    : null;
         Object resolutionId    = ctx != null ? ctx.get("resolutionId")    : null;
         Object amount          = ctx != null ? ctx.get("amount")          : null;
-        Object confirmationUrl = ctx != null ? ctx.get("confirmationUrl") : null;
 
         return switch (type) {
             case BOOKING_APPLIED -> new Content(
@@ -68,8 +62,7 @@ public class NotificationServiceImpl implements NotificationService {
                     "A resolution window has been opened for booking #" + bookingId + " (resolution #" + resolutionId + ").");
             case RESOLUTION_MONEY_REQUESTED -> new Content(
                     "Payment requested",
-                    "The host has requested a payment of " + amount + " RUB for resolution #" + resolutionId + ".\n\n"
-                    + "Click the link below to pay:\n" + confirmationUrl);
+                    "The host has requested a payment of " + amount + " RUB for resolution #" + resolutionId + ".");
             case RESOLUTION_PAYMENT_RECEIVED -> new Content(
                     "Payment received",
                     "Payment has been received for resolution #" + resolutionId + ".");

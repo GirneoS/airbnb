@@ -11,8 +11,8 @@
     <name>AirBnb</name>
 
     <modules>
-        <module>airbnb-payment-api</module>
-        <module>airbnb-payment-ra</module>
+        <module>airbnb-bitrix-api</module>
+        <module>airbnb-bitrix-ra</module>
         <module>airbnb-monolith</module>
         <module>airbnb-notification</module>
     </modules>

@@ -1,0 +1,6 @@
+org/mryrt/airbnb/bitrix/ra/impl/BitrixConnectionFactoryImpl.class
+org/mryrt/airbnb/bitrix/ra/impl/BitrixManagedConnectionFactory.class
+org/mryrt/airbnb/bitrix/ra/impl/BitrixManagedConnection$1.class
+org/mryrt/airbnb/bitrix/ra/impl/BitrixConnectionImpl.class
+org/mryrt/airbnb/bitrix/ra/impl/BitrixManagedConnection.class
+org/mryrt/airbnb/bitrix/ra/impl/BitrixResourceAdapter.class

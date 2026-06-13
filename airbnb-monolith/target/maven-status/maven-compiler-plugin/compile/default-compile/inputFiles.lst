@@ -11,17 +11,32 @@
 /Users/nozhegoff/University/BusinessLogicOfProgrammingSystems/airbnb/airbnb-monolith/src/main/java/org/mryrt/airbnb/resolution/service/ResolutionService.java
 /Users/nozhegoff/University/BusinessLogicOfProgrammingSystems/airbnb/airbnb-monolith/src/main/java/org/mryrt/airbnb/auth/config/SecurityConfig.java
 /Users/nozhegoff/University/BusinessLogicOfProgrammingSystems/airbnb/airbnb-monolith/src/main/java/org/mryrt/airbnb/resolution/dto/request/ResolveEscalationRequest.java
+<<<<<<< HEAD
 /Users/nozhegoff/University/BusinessLogicOfProgrammingSystems/airbnb/airbnb-monolith/src/main/java/org/mryrt/airbnb/resolution/model/ResolutionStatus.java
 /Users/nozhegoff/University/BusinessLogicOfProgrammingSystems/airbnb/airbnb-monolith/src/main/java/org/mryrt/airbnb/listing/service/ListingServiceImpl.java
 /Users/nozhegoff/University/BusinessLogicOfProgrammingSystems/airbnb/airbnb-monolith/src/main/java/org/mryrt/airbnb/auth/controller/AuthController.java
+=======
+/Users/nozhegoff/University/BusinessLogicOfProgrammingSystems/airbnb/airbnb-monolith/src/main/java/org/mryrt/airbnb/bitrix/service/BitrixService.java
+/Users/nozhegoff/University/BusinessLogicOfProgrammingSystems/airbnb/airbnb-monolith/src/main/java/org/mryrt/airbnb/resolution/model/ResolutionStatus.java
+/Users/nozhegoff/University/BusinessLogicOfProgrammingSystems/airbnb/airbnb-monolith/src/main/java/org/mryrt/airbnb/listing/service/ListingServiceImpl.java
+/Users/nozhegoff/University/BusinessLogicOfProgrammingSystems/airbnb/airbnb-monolith/src/main/java/org/mryrt/airbnb/auth/controller/AuthController.java
+/Users/nozhegoff/University/BusinessLogicOfProgrammingSystems/airbnb/airbnb-monolith/src/main/java/org/mryrt/airbnb/notification/NotificationMockController.java
+>>>>>>> b511a51 (done)
 /Users/nozhegoff/University/BusinessLogicOfProgrammingSystems/airbnb/airbnb-monolith/src/main/java/org/mryrt/airbnb/booking/model/Booking.java
 /Users/nozhegoff/University/BusinessLogicOfProgrammingSystems/airbnb/airbnb-monolith/src/main/java/org/mryrt/airbnb/booking/model/BookingStatus.java
 /Users/nozhegoff/University/BusinessLogicOfProgrammingSystems/airbnb/airbnb-monolith/src/main/java/org/mryrt/airbnb/auth/dto/request/TokenRequest.java
 /Users/nozhegoff/University/BusinessLogicOfProgrammingSystems/airbnb/airbnb-monolith/src/main/java/org/mryrt/airbnb/auth/service/user/UserService.java
+<<<<<<< HEAD
 /Users/nozhegoff/University/BusinessLogicOfProgrammingSystems/airbnb/airbnb-monolith/src/main/java/org/mryrt/airbnb/payment/service/PaymentServiceImpl.java
 /Users/nozhegoff/University/BusinessLogicOfProgrammingSystems/airbnb/airbnb-monolith/src/main/java/org/mryrt/airbnb/auth/config/PasswordConfig.java
 /Users/nozhegoff/University/BusinessLogicOfProgrammingSystems/airbnb/airbnb-monolith/src/main/java/org/mryrt/airbnb/resolution/dto/request/RequestMoneyRequest.java
 /Users/nozhegoff/University/BusinessLogicOfProgrammingSystems/airbnb/airbnb-monolith/src/main/java/org/mryrt/airbnb/auth/service/jwt/blacklist/BlacklistService.java
+=======
+/Users/nozhegoff/University/BusinessLogicOfProgrammingSystems/airbnb/airbnb-monolith/src/main/java/org/mryrt/airbnb/auth/config/PasswordConfig.java
+/Users/nozhegoff/University/BusinessLogicOfProgrammingSystems/airbnb/airbnb-monolith/src/main/java/org/mryrt/airbnb/resolution/dto/request/RequestMoneyRequest.java
+/Users/nozhegoff/University/BusinessLogicOfProgrammingSystems/airbnb/airbnb-monolith/src/main/java/org/mryrt/airbnb/auth/service/jwt/blacklist/BlacklistService.java
+/Users/nozhegoff/University/BusinessLogicOfProgrammingSystems/airbnb/airbnb-monolith/src/main/java/org/mryrt/airbnb/notification/config/StompConfig.java
+>>>>>>> b511a51 (done)
 /Users/nozhegoff/University/BusinessLogicOfProgrammingSystems/airbnb/airbnb-monolith/src/main/java/org/mryrt/airbnb/util/pageable/constants/PageableConstants.java
 /Users/nozhegoff/University/BusinessLogicOfProgrammingSystems/airbnb/airbnb-monolith/src/main/java/org/mryrt/airbnb/auth/dto/UserDto.java
 /Users/nozhegoff/University/BusinessLogicOfProgrammingSystems/airbnb/airbnb-monolith/src/main/java/org/mryrt/airbnb/notification/NotificationService.java
@@ -70,8 +85,13 @@
 /Users/nozhegoff/University/BusinessLogicOfProgrammingSystems/airbnb/airbnb-monolith/src/main/java/org/mryrt/airbnb/util/pageable/DefaultPageableFactory.java
 /Users/nozhegoff/University/BusinessLogicOfProgrammingSystems/airbnb/airbnb-monolith/src/main/java/org/mryrt/airbnb/listing/repository/filter/ListingFilter.java
 /Users/nozhegoff/University/BusinessLogicOfProgrammingSystems/airbnb/airbnb-monolith/src/main/java/org/mryrt/airbnb/resolution/service/ResolutionServiceImpl.java
+<<<<<<< HEAD
 /Users/nozhegoff/University/BusinessLogicOfProgrammingSystems/airbnb/airbnb-monolith/src/main/java/org/mryrt/airbnb/auth/model/Role.java
 /Users/nozhegoff/University/BusinessLogicOfProgrammingSystems/airbnb/airbnb-monolith/src/main/java/org/mryrt/airbnb/payment/controller/PaymentController.java
+=======
+/Users/nozhegoff/University/BusinessLogicOfProgrammingSystems/airbnb/airbnb-monolith/src/main/java/org/mryrt/airbnb/bitrix/service/BitrixServiceImpl.java
+/Users/nozhegoff/University/BusinessLogicOfProgrammingSystems/airbnb/airbnb-monolith/src/main/java/org/mryrt/airbnb/auth/model/Role.java
+>>>>>>> b511a51 (done)
 /Users/nozhegoff/University/BusinessLogicOfProgrammingSystems/airbnb/airbnb-monolith/src/main/java/org/mryrt/airbnb/exception/ServiceException.java
 /Users/nozhegoff/University/BusinessLogicOfProgrammingSystems/airbnb/airbnb-monolith/src/main/java/org/mryrt/airbnb/notification/NotificationType.java
 /Users/nozhegoff/University/BusinessLogicOfProgrammingSystems/airbnb/airbnb-monolith/src/main/java/org/mryrt/airbnb/resolution/dto/request/ComplaintRequest.java
@@ -81,13 +101,20 @@
 /Users/nozhegoff/University/BusinessLogicOfProgrammingSystems/airbnb/airbnb-monolith/src/main/java/org/mryrt/airbnb/booking/access/BookingAccessService.java
 /Users/nozhegoff/University/BusinessLogicOfProgrammingSystems/airbnb/airbnb-monolith/src/main/java/org/mryrt/airbnb/config/JpaAuditConfig.java
 /Users/nozhegoff/University/BusinessLogicOfProgrammingSystems/airbnb/airbnb-monolith/src/main/java/org/mryrt/airbnb/listing/model/Listing.java
+<<<<<<< HEAD
+=======
+/Users/nozhegoff/University/BusinessLogicOfProgrammingSystems/airbnb/airbnb-monolith/src/main/java/org/mryrt/airbnb/resolution/config/SchedulingConfig.java
+>>>>>>> b511a51 (done)
 /Users/nozhegoff/University/BusinessLogicOfProgrammingSystems/airbnb/airbnb-monolith/src/main/java/org/mryrt/airbnb/auth/annotation/Login.java
 /Users/nozhegoff/University/BusinessLogicOfProgrammingSystems/airbnb/airbnb-monolith/src/main/java/org/mryrt/airbnb/listing/access/ListingAccessServiceImpl.java
 /Users/nozhegoff/University/BusinessLogicOfProgrammingSystems/airbnb/airbnb-monolith/src/main/java/org/mryrt/airbnb/auth/service/jwt/DefaultJwtService.java
 /Users/nozhegoff/University/BusinessLogicOfProgrammingSystems/airbnb/airbnb-monolith/src/main/java/org/mryrt/airbnb/auth/jaas/XmlFileLoginModule.java
 /Users/nozhegoff/University/BusinessLogicOfProgrammingSystems/airbnb/airbnb-monolith/src/main/java/org/mryrt/airbnb/auth/model/UserDetailsImpl.java
 /Users/nozhegoff/University/BusinessLogicOfProgrammingSystems/airbnb/airbnb-monolith/src/main/java/org/mryrt/airbnb/booking/controller/BookingController.java
+<<<<<<< HEAD
 /Users/nozhegoff/University/BusinessLogicOfProgrammingSystems/airbnb/airbnb-monolith/src/main/java/org/mryrt/airbnb/payment/service/PaymentService.java
+=======
+>>>>>>> b511a51 (done)
 /Users/nozhegoff/University/BusinessLogicOfProgrammingSystems/airbnb/airbnb-monolith/src/main/java/org/mryrt/airbnb/resolution/repository/specifications/ResolutionSpecifications.java
 /Users/nozhegoff/University/BusinessLogicOfProgrammingSystems/airbnb/airbnb-monolith/src/main/java/org/mryrt/airbnb/booking/dto/request/DecideBookingRequest.java
 /Users/nozhegoff/University/BusinessLogicOfProgrammingSystems/airbnb/airbnb-monolith/src/main/java/org/mryrt/airbnb/listing/repository/specifications/ListingSpecifications.java
@@ -95,11 +122,18 @@
 /Users/nozhegoff/University/BusinessLogicOfProgrammingSystems/airbnb/airbnb-monolith/src/main/java/org/mryrt/airbnb/auth/dto/UserMapper.java
 /Users/nozhegoff/University/BusinessLogicOfProgrammingSystems/airbnb/airbnb-monolith/src/main/java/org/mryrt/airbnb/auth/annotation/LoginValidator.java
 /Users/nozhegoff/University/BusinessLogicOfProgrammingSystems/airbnb/airbnb-monolith/src/main/java/org/mryrt/airbnb/auth/jaas/XmlCredentialsStore.java
+<<<<<<< HEAD
+=======
+/Users/nozhegoff/University/BusinessLogicOfProgrammingSystems/airbnb/airbnb-monolith/src/main/java/org/mryrt/airbnb/notification/StompNotificationSender.java
+>>>>>>> b511a51 (done)
 /Users/nozhegoff/University/BusinessLogicOfProgrammingSystems/airbnb/airbnb-monolith/src/main/java/org/mryrt/airbnb/event/EventType.java
 /Users/nozhegoff/University/BusinessLogicOfProgrammingSystems/airbnb/airbnb-monolith/src/main/java/org/mryrt/airbnb/model/AuditableEntity.java
 /Users/nozhegoff/University/BusinessLogicOfProgrammingSystems/airbnb/airbnb-monolith/src/main/java/org/mryrt/airbnb/resolution/config/ResolutionScheduler.java
 /Users/nozhegoff/University/BusinessLogicOfProgrammingSystems/airbnb/airbnb-monolith/src/main/java/org/mryrt/airbnb/booking/service/BookingServiceImpl.java
+<<<<<<< HEAD
 /Users/nozhegoff/University/BusinessLogicOfProgrammingSystems/airbnb/airbnb-monolith/src/main/java/org/mryrt/airbnb/notification/config/JmsConfig.java
+=======
+>>>>>>> b511a51 (done)
 /Users/nozhegoff/University/BusinessLogicOfProgrammingSystems/airbnb/airbnb-monolith/src/main/java/org/mryrt/airbnb/util/fieldOrder/ClassFieldOrderUtil.java
 /Users/nozhegoff/University/BusinessLogicOfProgrammingSystems/airbnb/airbnb-monolith/src/main/java/org/mryrt/airbnb/booking/repository/BookingRepository.java
 /Users/nozhegoff/University/BusinessLogicOfProgrammingSystems/airbnb/airbnb-monolith/src/main/java/org/mryrt/airbnb/resolution/config/ResolutionSortConfig.java

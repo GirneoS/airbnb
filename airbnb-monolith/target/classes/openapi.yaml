@@ -203,7 +203,11 @@ components:
     # ── Listing DTOs ──────────────────────────────────────────────────────────
     CreateListingRequest:
       type: object
+<<<<<<< HEAD
       required: [title]
+=======
+      required: [title, pricePerNight]
+>>>>>>> b511a51 (done)
       properties:
         title:
           type: string
@@ -212,6 +216,14 @@ components:
         description:
           type: string
           maxLength: 2000
+<<<<<<< HEAD
+=======
+        pricePerNight:
+          type: number
+          format: double
+          minimum: 0.01
+          example: 3500.00
+>>>>>>> b511a51 (done)
 
     UpdateListingRequest:
       type: object
@@ -222,6 +234,14 @@ components:
         description:
           type: string
           maxLength: 2000
+<<<<<<< HEAD
+=======
+        pricePerNight:
+          type: number
+          format: double
+          minimum: 0.01
+          example: 3500.00
+>>>>>>> b511a51 (done)
         status:
           $ref: '#/components/schemas/ListingStatus'
 
@@ -238,6 +258,13 @@ components:
           type: string
         description:
           type: string
+<<<<<<< HEAD
+=======
+        pricePerNight:
+          type: number
+          format: double
+          example: 3500.00
+>>>>>>> b511a51 (done)
         status:
           $ref: '#/components/schemas/ListingStatus'
         createdAt:
@@ -303,6 +330,18 @@ components:
           type: string
           format: date-time
           nullable: true
+<<<<<<< HEAD
+=======
+        bitrixDealId:
+          type: integer
+          format: int64
+          nullable: true
+          description: Identifier of the corresponding deal in Bitrix24 CRM
+        totalPrice:
+          type: number
+          format: double
+          example: 10500.00
+>>>>>>> b511a51 (done)
         createdAt:
           type: string
           format: date-time

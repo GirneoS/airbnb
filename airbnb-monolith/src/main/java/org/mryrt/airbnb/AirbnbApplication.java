@@ -13,12 +13,13 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 public class AirbnbApplication extends SpringBootServletInitializer {
 
 	public static void main(String[] args) {
+        System.out.println("logging test from main");
 		SpringApplication.run(AirbnbApplication.class, args);
 	}
 
 	@Override
 	protected SpringApplicationBuilder configure(SpringApplicationBuilder builder) {
-		return builder
-				.sources(AirbnbApplication.class);
+		System.setProperty("org.springframework.boot.logging.LoggingSystem", "none");
+		return builder.sources(AirbnbApplication.class);
 	}
 }
