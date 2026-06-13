@@ -1,0 +1,6 @@
+org/mryrt/airbnb/payment/ra/impl/PaymentManagedConnection.class
+org/mryrt/airbnb/payment/ra/impl/PaymentManagedConnectionFactory.class
+org/mryrt/airbnb/payment/ra/impl/PaymentConnectionFactoryImpl.class
+org/mryrt/airbnb/payment/ra/impl/PaymentConnectionImpl.class
+org/mryrt/airbnb/payment/ra/impl/PaymentManagedConnection$1.class
+org/mryrt/airbnb/payment/ra/impl/PaymentResourceAdapter.class

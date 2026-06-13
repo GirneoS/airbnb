@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<connector xmlns="https://jakarta.ee/xml/ns/jakartaee"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee
+               https://jakarta.ee/xml/ns/jakartaee/connector_2_0.xsd"
+           version="2.0">
+
+    <vendor-name>AirBnb</vendor-name>
+    <eis-type>Payment Gateway (YooKassa)</eis-type>
+    <resourceadapter-version>1.0</resourceadapter-version>
+
+    <resourceadapter>
+        <resourceadapter-class>
+            org.mryrt.airbnb.payment.ra.impl.PaymentResourceAdapter
+        </resourceadapter-class>
+
+        <outbound-resourceadapter>
+            <connection-definition>
+                <managedconnectionfactory-class>
+                    org.mryrt.airbnb.payment.ra.impl.PaymentManagedConnectionFactory
+                </managedconnectionfactory-class>
+                <connectionfactory-interface>
+                    org.mryrt.airbnb.payment.ra.api.PaymentConnectionFactory
+                </connectionfactory-interface>
+                <connectionfactory-impl-class>
+                    org.mryrt.airbnb.payment.ra.impl.PaymentConnectionFactoryImpl
+                </connectionfactory-impl-class>
+                <connection-interface>
+                    org.mryrt.airbnb.payment.ra.api.PaymentConnection
+                </connection-interface>
+                <connection-impl-class>
+                    org.mryrt.airbnb.payment.ra.impl.PaymentConnectionImpl
+                </connection-impl-class>
+            </connection-definition>
+            <transaction-support>NoTransaction</transaction-support>
+            <reauthentication-support>false</reauthentication-support>
+        </outbound-resourceadapter>
+    </resourceadapter>
+</connector>

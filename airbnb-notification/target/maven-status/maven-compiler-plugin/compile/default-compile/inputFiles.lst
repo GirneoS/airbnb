@@ -1,0 +1,9 @@
+/Users/nozhegoff/University/BusinessLogicOfProgrammingSystems/airbnb/airbnb-notification/src/main/java/org/mryrt/airbnb/notification/service/NotificationServiceImpl.java
+/Users/nozhegoff/University/BusinessLogicOfProgrammingSystems/airbnb/airbnb-notification/src/main/java/org/mryrt/airbnb/notification/service/NotificationService.java
+/Users/nozhegoff/University/BusinessLogicOfProgrammingSystems/airbnb/airbnb-notification/src/main/java/org/mryrt/airbnb/notification/dto/EmailMessage.java
+/Users/nozhegoff/University/BusinessLogicOfProgrammingSystems/airbnb/airbnb-notification/src/main/java/org/mryrt/airbnb/notification/service/email/EmailService.java
+/Users/nozhegoff/University/BusinessLogicOfProgrammingSystems/airbnb/airbnb-notification/src/main/java/org/mryrt/airbnb/notification/listener/NotificationListener.java
+/Users/nozhegoff/University/BusinessLogicOfProgrammingSystems/airbnb/airbnb-notification/src/main/java/org/mryrt/airbnb/notification/config/JmsConfig.java
+/Users/nozhegoff/University/BusinessLogicOfProgrammingSystems/airbnb/airbnb-notification/src/main/java/org/mryrt/airbnb/notification/config/MailConfig.java
+/Users/nozhegoff/University/BusinessLogicOfProgrammingSystems/airbnb/airbnb-notification/src/main/java/org/mryrt/airbnb/notification/AirbnbNotificationApp.java
+/Users/nozhegoff/University/BusinessLogicOfProgrammingSystems/airbnb/airbnb-notification/src/main/java/org/mryrt/airbnb/notification/service/email/SmtpEmailService.java

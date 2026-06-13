@@ -1,0 +1,1676 @@
+openapi: 3.0.3
+info:
+  title: Airbnb API
+  version: 1.0.0
+  description: |
+    REST API for the Airbnb-like platform. Supports listing management, booking lifecycle,
+    post-checkout resolutions, and in-app notifications.
+
+    **Authentication:** JWT Bearer tokens. Obtain tokens via `/auth/login`, `/auth/register-user`,
+    or `/auth/register-owner`, then pass them as `Authorization: Bearer <token>` on protected endpoints.
+
+servers:
+  - url: http://localhost:8085
+    description: Local dev server
+
+tags:
+  - name: Auth
+    description: Registration, login, token management
+  - name: Users
+    description: User profile and role management
+  - name: Listings
+    description: Property listing CRUD
+  - name: Bookings
+    description: Booking lifecycle
+  - name: Notifications
+    description: In-app notifications
+  - name: Resolutions
+    description: Post-checkout dispute / resolution windows
+  - name: Health
+    description: Service health
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECURITY
+# ─────────────────────────────────────────────────────────────────────────────
+security:
+  - bearerAuth: []
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  # ─── SCHEMAS ──────────────────────────────────────────────────────────────
+  schemas:
+
+    # ── Enums ────────────────────────────────────────────────────────────────
+    Role:
+      type: string
+      enum: [ROLE_USER, ROLE_OWNER, ROLE_ADMIN]
+
+    BookingStatus:
+      type: string
+      enum: [APPLIED, APPROVED, REJECTED, CHECKED_IN, CHECKED_OUT]
+
+    ListingStatus:
+      type: string
+      enum: [DRAFT, PUBLISHED]
+
+    NotificationType:
+      type: string
+      enum:
+        - LISTING_PUBLISHED
+        - BOOKING_APPLIED
+        - BOOKING_APPROVED
+        - BOOKING_REJECTED
+        - BOOKING_REJECTED_ANOTHER_APPROVED
+        - BOOKING_CHECKED_IN
+        - BOOKING_CHECKED_OUT
+        - RESOLUTION_WINDOW_OPENED
+        - RESOLUTION_MONEY_REQUESTED
+        - RESOLUTION_PAYMENT_RECEIVED
+        - RESOLUTION_GUEST_REFUSED
+        - RESOLUTION_ESCALATED
+        - RESOLUTION_MANDATORY_PAYMENT_ASSIGNED
+        - RESOLUTION_RESOLVED_WITHOUT_PAYMENT
+        - RESOLUTION_COMPLAINT_RECORDED
+        - RESOLUTION_WINDOW_CLOSED_AUTO
+        - RESOLUTION_WINDOW_CLOSED
+        - RESOLUTION_WINDOW_CLOSED_BY_OWNER
+
+    ResolutionStatus:
+      type: string
+      enum:
+        - OPEN
+        - MONEY_REQUESTED
+        - PAID
+        - REFUSED
+        - ESCALATED
+        - MANDATORY_PAYMENT
+        - COMPLAINT_RECORDED
+        - CLOSED
+
+    # ── Auth DTOs ─────────────────────────────────────────────────────────────
+    UserRequest:
+      type: object
+      required: [username, email, password]
+      properties:
+        username:
+          type: string
+          description: Alphanumeric, underscores and spaces; 3–50 chars
+          minLength: 3
+          maxLength: 50
+        email:
+          type: string
+          format: email
+          maxLength: 255
+        password:
+          type: string
+          format: password
+          minLength: 8
+
+    LoginRequest:
+      type: object
+      required: [username, password]
+      properties:
+        username:
+          type: string
+          description: Username or email accepted by the @Login validator
+        password:
+          type: string
+          format: password
+          minLength: 8
+
+    TokenRequest:
+      type: object
+      required: [token]
+      properties:
+        token:
+          type: string
+
+    RoleRequest:
+      type: object
+      required: [roles]
+      properties:
+        roles:
+          type: array
+          items:
+            $ref: '#/components/schemas/Role'
+          uniqueItems: true
+
+    UserUpdateRequest:
+      type: object
+      properties:
+        username:
+          type: string
+          minLength: 3
+          maxLength: 50
+          pattern: '^[a-zA-Z0-9_\s]+$'
+        email:
+          type: string
+          format: email
+          maxLength: 255
+        password:
+          type: string
+          format: password
+          minLength: 8
+
+    UserDto:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        username:
+          type: string
+        email:
+          type: string
+          format: email
+        roles:
+          type: array
+          items:
+            $ref: '#/components/schemas/Role'
+          uniqueItems: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        version:
+          type: integer
+          format: int64
+
+    TokenPair:
+      type: object
+      properties:
+        accessToken:
+          type: string
+        refreshToken:
+          type: string
+
+    ValidateTokenResponse:
+      type: object
+      properties:
+        valid:
+          type: boolean
+        username:
+          type: string
+          description: Empty string when token is invalid
+
+    # ── Listing DTOs ──────────────────────────────────────────────────────────
+    CreateListingRequest:
+      type: object
+      required: [title]
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 500
+        description:
+          type: string
+          maxLength: 2000
+
+    UpdateListingRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          maxLength: 500
+        description:
+          type: string
+          maxLength: 2000
+        status:
+          $ref: '#/components/schemas/ListingStatus'
+
+    ListingDto:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        ownerId:
+          type: integer
+          format: int64
+        title:
+          type: string
+        description:
+          type: string
+        status:
+          $ref: '#/components/schemas/ListingStatus'
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        version:
+          type: integer
+          format: int64
+
+    # ── Booking DTOs ──────────────────────────────────────────────────────────
+    CreateBookingRequest:
+      type: object
+      required: [listingId, checkInDate, checkOutDate]
+      properties:
+        listingId:
+          type: integer
+          format: int64
+        checkInDate:
+          type: string
+          format: date
+        checkOutDate:
+          type: string
+          format: date
+
+    DecideBookingRequest:
+      type: object
+      required: [status]
+      properties:
+        status:
+          $ref: '#/components/schemas/BookingStatus'
+
+    BookingDto:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        listingId:
+          type: integer
+          format: int64
+        guestId:
+          type: integer
+          format: int64
+        status:
+          $ref: '#/components/schemas/BookingStatus'
+        checkInDate:
+          type: string
+          format: date
+        checkOutDate:
+          type: string
+          format: date
+        appliedAt:
+          type: string
+          format: date-time
+        checkInAt:
+          type: string
+          format: date-time
+          nullable: true
+        checkOutAt:
+          type: string
+          format: date-time
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        version:
+          type: integer
+          format: int64
+
+    # ── Notification DTOs ─────────────────────────────────────────────────────
+    NotificationDto:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        userId:
+          type: integer
+          format: int64
+        type:
+          $ref: '#/components/schemas/NotificationType'
+        title:
+          type: string
+        body:
+          type: string
+        relatedBookingId:
+          type: integer
+          format: int64
+          nullable: true
+        relatedResolutionId:
+          type: integer
+          format: int64
+          nullable: true
+        read:
+          type: boolean
+        readAt:
+          type: string
+          format: date-time
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+
+    # ── Resolution DTOs ───────────────────────────────────────────────────────
+    RequestMoneyRequest:
+      type: object
+      required: [amountRequested]
+      properties:
+        amountRequested:
+          type: number
+          format: decimal
+          minimum: 0.01
+
+    ComplaintRequest:
+      type: object
+      properties:
+        description:
+          type: string
+          maxLength: 2000
+
+    ResolveEscalationRequest:
+      type: object
+      properties:
+        substantialIncident:
+          type: boolean
+          description: |
+            `true` → mandatory guest payment assigned;
+            `false` → resolved without payment
+
+    ResolutionDto:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        bookingId:
+          type: integer
+          format: int64
+        status:
+          $ref: '#/components/schemas/ResolutionStatus'
+        openedAt:
+          type: string
+          format: date-time
+        closedAt:
+          type: string
+          format: date-time
+          nullable: true
+        moneyRequestedAt:
+          type: string
+          format: date-time
+          nullable: true
+        refusedAt:
+          type: string
+          format: date-time
+          nullable: true
+        amountRequested:
+          type: number
+          format: decimal
+          nullable: true
+        complaintDescription:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        version:
+          type: integer
+          format: int64
+
+    # ── Pagination ────────────────────────────────────────────────────────────
+    PageMetadata:
+      type: object
+      properties:
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+        size:
+          type: integer
+        number:
+          type: integer
+
+    PageOfUsers:
+      allOf:
+        - $ref: '#/components/schemas/PageMetadata'
+        - type: object
+          properties:
+            content:
+              type: array
+              items:
+                $ref: '#/components/schemas/UserDto'
+
+    PageOfListings:
+      allOf:
+        - $ref: '#/components/schemas/PageMetadata'
+        - type: object
+          properties:
+            content:
+              type: array
+              items:
+                $ref: '#/components/schemas/ListingDto'
+
+    PageOfBookings:
+      allOf:
+        - $ref: '#/components/schemas/PageMetadata'
+        - type: object
+          properties:
+            content:
+              type: array
+              items:
+                $ref: '#/components/schemas/BookingDto'
+
+    PageOfNotifications:
+      allOf:
+        - $ref: '#/components/schemas/PageMetadata'
+        - type: object
+          properties:
+            content:
+              type: array
+              items:
+                $ref: '#/components/schemas/NotificationDto'
+
+    PageOfResolutions:
+      allOf:
+        - $ref: '#/components/schemas/PageMetadata'
+        - type: object
+          properties:
+            content:
+              type: array
+              items:
+                $ref: '#/components/schemas/ResolutionDto'
+
+    # ── Error ─────────────────────────────────────────────────────────────────
+    ErrorDetail:
+      type: object
+      properties:
+        field:
+          type: string
+        message:
+          type: string
+        rejectedValue:
+          type: object
+          nullable: true
+        errorType:
+          type: string
+
+    ErrorResponse:
+      type: object
+      properties:
+        status:
+          type: integer
+        message:
+          type: string
+        details:
+          type: array
+          items:
+            $ref: '#/components/schemas/ErrorDetail'
+          nullable: true
+        timestamp:
+          type: string
+          format: date-time
+
+  # ─── REUSABLE PARAMETERS ──────────────────────────────────────────────────
+  parameters:
+    PageParam:
+      name: page
+      in: query
+      schema:
+        type: integer
+        default: 0
+    SizeParam:
+      name: size
+      in: query
+      schema:
+        type: integer
+        default: 20
+    SortParam:
+      name: sort
+      in: query
+      description: "Field and direction, e.g. `createdAt,desc`"
+      schema:
+        type: string
+
+  # ─── REUSABLE RESPONSES ───────────────────────────────────────────────────
+  responses:
+    Unauthorized:
+      description: Missing or invalid JWT token
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Forbidden:
+      description: Insufficient permissions
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    BadRequest:
+      description: Validation or parsing error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    InternalError:
+      description: Unexpected server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+# ─────────────────────────────────────────────────────────────────────────────
+# PATHS
+# ─────────────────────────────────────────────────────────────────────────────
+paths:
+
+  # ════════════════════════════════════════════════════════════════════════════
+  # HEALTH
+  # ════════════════════════════════════════════════════════════════════════════
+  /health:
+    get:
+      tags: [Health]
+      summary: Health check
+      security: []
+      responses:
+        '200':
+          description: Service is up
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: UP
+
+  # ════════════════════════════════════════════════════════════════════════════
+  # AUTH
+  # ════════════════════════════════════════════════════════════════════════════
+  /auth/register-user:
+    post:
+      tags: [Auth]
+      summary: Register a new user (guest, ROLE_USER)
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRequest'
+      responses:
+        '201':
+          description: User created; JWT tokens issued
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenPair'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  /auth/register-owner:
+    post:
+      tags: [Auth]
+      summary: Register a new owner (ROLE_USER + ROLE_OWNER)
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRequest'
+      responses:
+        '201':
+          description: Owner created; JWT tokens issued
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenPair'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  /auth/login:
+    post:
+      tags: [Auth]
+      summary: Login with username/email and password (JAAS)
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Authenticated; JWT tokens issued
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenPair'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /auth/refresh:
+    post:
+      tags: [Auth]
+      summary: Refresh access token using a refresh token
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenRequest'
+      responses:
+        '200':
+          description: New token pair
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenPair'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /auth/validate:
+    post:
+      tags: [Auth]
+      summary: Validate a token and extract the subject username
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenRequest'
+      responses:
+        '200':
+          description: Validation result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidateTokenResponse'
+
+  /auth/logout:
+    post:
+      tags: [Auth]
+      summary: Invalidate the current access token
+      responses:
+        '200':
+          description: Logged out
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # ════════════════════════════════════════════════════════════════════════════
+  # USERS
+  # ════════════════════════════════════════════════════════════════════════════
+  /users:
+    get:
+      tags: [Users]
+      summary: List users with filtering (admin only)
+      parameters:
+        - name: username
+          in: query
+          schema:
+            type: string
+        - name: createdAtAfter
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: createdAtBefore
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: updatedAtAfter
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: updatedAtBefore
+          in: query
+          schema:
+            type: string
+            format: date
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/SizeParam'
+        - $ref: '#/components/parameters/SortParam'
+      responses:
+        '200':
+          description: Page of users
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PageOfUsers'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /users/me:
+    get:
+      tags: [Users]
+      summary: Get authenticated user profile
+      responses:
+        '200':
+          description: Current user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDto'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /users/permissions:
+    get:
+      tags: [Users]
+      summary: Get authenticated user permission codes
+      responses:
+        '200':
+          description: List of permission string codes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /users/{id}:
+    get:
+      tags: [Users]
+      summary: Get user by ID (admin only)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: User
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDto'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    put:
+      tags: [Users]
+      summary: Update user profile (admin only)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserUpdateRequest'
+      responses:
+        '200':
+          description: Updated user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      tags: [Users]
+      summary: Delete user (admin only)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Deleted user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDto'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /users/username/{username}:
+    get:
+      tags: [Users]
+      summary: Get user by username (admin only)
+      parameters:
+        - name: username
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: User
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDto'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /users/{id}/roles:
+    put:
+      tags: [Users]
+      summary: Replace user roles (admin only)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RoleRequest'
+      responses:
+        '200':
+          description: User with updated roles
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # ════════════════════════════════════════════════════════════════════════════
+  # LISTINGS
+  # ════════════════════════════════════════════════════════════════════════════
+  /listings:
+    post:
+      tags: [Listings]
+      summary: Create a new property listing
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateListingRequest'
+      responses:
+        '201':
+          description: Created listing
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListingDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+    get:
+      tags: [Listings]
+      summary: List listings with filtering
+      parameters:
+        - name: ownerId
+          in: query
+          schema:
+            type: integer
+            format: int64
+        - name: status
+          in: query
+          schema:
+            $ref: '#/components/schemas/ListingStatus'
+        - name: titleLike
+          in: query
+          schema:
+            type: string
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/SizeParam'
+        - $ref: '#/components/parameters/SortParam'
+      responses:
+        '200':
+          description: Page of listings
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PageOfListings'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /listings/{id}:
+    get:
+      tags: [Listings]
+      summary: Get listing by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Listing
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListingDto'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    put:
+      tags: [Listings]
+      summary: Update listing
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateListingRequest'
+      responses:
+        '200':
+          description: Updated listing
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListingDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      tags: [Listings]
+      summary: Delete listing
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Deleted listing
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListingDto'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # ════════════════════════════════════════════════════════════════════════════
+  # BOOKINGS
+  # ════════════════════════════════════════════════════════════════════════════
+  /bookings:
+    post:
+      tags: [Bookings]
+      summary: Create a booking request
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateBookingRequest'
+      responses:
+        '201':
+          description: Booking created (status APPLIED)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+    get:
+      tags: [Bookings]
+      summary: List bookings with filtering
+      parameters:
+        - name: listingId
+          in: query
+          schema:
+            type: integer
+            format: int64
+        - name: guestId
+          in: query
+          schema:
+            type: integer
+            format: int64
+        - name: status
+          in: query
+          schema:
+            $ref: '#/components/schemas/BookingStatus'
+        - name: checkInDateFrom
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: checkOutDateTo
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: appliedAtAfter
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: appliedAtBefore
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/SizeParam'
+        - $ref: '#/components/parameters/SortParam'
+      responses:
+        '200':
+          description: Page of bookings
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PageOfBookings'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /bookings/{id}:
+    get:
+      tags: [Bookings]
+      summary: Get booking by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Booking
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingDto'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /bookings/{id}/decide:
+    put:
+      tags: [Bookings]
+      summary: Owner approves or rejects a booking
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DecideBookingRequest'
+      responses:
+        '200':
+          description: Booking with updated status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /bookings/{id}/check-in:
+    put:
+      tags: [Bookings]
+      summary: Record guest check-in (status → CHECKED_IN)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Booking after check-in
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingDto'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /bookings/{id}/check-out:
+    put:
+      tags: [Bookings]
+      summary: Record guest check-out (status → CHECKED_OUT)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Booking after check-out
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingDto'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # ════════════════════════════════════════════════════════════════════════════
+  # NOTIFICATIONS
+  # ════════════════════════════════════════════════════════════════════════════
+  /notifications:
+    get:
+      tags: [Notifications]
+      summary: List notifications (auto-scoped to authenticated user)
+      parameters:
+        - name: userId
+          in: query
+          description: Admin filter; regular users are restricted to their own notifications
+          schema:
+            type: integer
+            format: int64
+        - name: unreadOnly
+          in: query
+          schema:
+            type: boolean
+        - name: type
+          in: query
+          schema:
+            $ref: '#/components/schemas/NotificationType'
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/SizeParam'
+        - $ref: '#/components/parameters/SortParam'
+      responses:
+        '200':
+          description: Page of notifications
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PageOfNotifications'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /notifications/unread-count:
+    get:
+      tags: [Notifications]
+      summary: Count unread notifications for authenticated user
+      responses:
+        '200':
+          description: Unread count
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+                    format: int64
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /notifications/mark-all-read:
+    post:
+      tags: [Notifications]
+      summary: Mark all notifications of authenticated user as read
+      responses:
+        '200':
+          description: All notifications marked read
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /notifications/{id}:
+    get:
+      tags: [Notifications]
+      summary: Get notification by ID (owner or admin)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Notification
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationDto'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /notifications/{id}/read:
+    patch:
+      tags: [Notifications]
+      summary: Mark a single notification as read
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Updated notification
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationDto'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # ════════════════════════════════════════════════════════════════════════════
+  # RESOLUTIONS
+  # ════════════════════════════════════════════════════════════════════════════
+  /resolutions/open/{bookingId}:
+    post:
+      tags: [Resolutions]
+      summary: Open a resolution window for a completed booking
+      parameters:
+        - name: bookingId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '201':
+          description: Resolution window opened
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResolutionDto'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /resolutions:
+    get:
+      tags: [Resolutions]
+      summary: List resolution windows with filtering
+      parameters:
+        - name: bookingId
+          in: query
+          schema:
+            type: integer
+            format: int64
+        - name: status
+          in: query
+          schema:
+            $ref: '#/components/schemas/ResolutionStatus'
+        - name: openedAtAfter
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: openedAtBefore
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/SizeParam'
+        - $ref: '#/components/parameters/SortParam'
+      responses:
+        '200':
+          description: Page of resolutions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PageOfResolutions'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /resolutions/{id}:
+    get:
+      tags: [Resolutions]
+      summary: Get resolution by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Resolution
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResolutionDto'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /resolutions/booking/{bookingId}:
+    get:
+      tags: [Resolutions]
+      summary: Get resolution by booking ID
+      parameters:
+        - name: bookingId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Resolution
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResolutionDto'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /resolutions/{id}/request-money:
+    put:
+      tags: [Resolutions]
+      summary: Owner requests monetary compensation from guest
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RequestMoneyRequest'
+      responses:
+        '200':
+          description: Resolution updated to MONEY_REQUESTED
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResolutionDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /resolutions/{id}/respond-pay:
+    put:
+      tags: [Resolutions]
+      summary: Guest agrees to pay the requested amount
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Resolution updated to PAID
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResolutionDto'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /resolutions/{id}/respond-refuse:
+    put:
+      tags: [Resolutions]
+      summary: Guest refuses to pay
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Resolution updated to REFUSED
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResolutionDto'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /resolutions/{id}/escalate:
+    put:
+      tags: [Resolutions]
+      summary: Owner escalates refused resolution to admin
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Resolution updated to ESCALATED
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResolutionDto'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /resolutions/{id}/complaint:
+    put:
+      tags: [Resolutions]
+      summary: Owner files a complaint without a money request
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ComplaintRequest'
+      responses:
+        '200':
+          description: Resolution updated to COMPLAINT_RECORDED
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResolutionDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /resolutions/{id}/close:
+    put:
+      tags: [Resolutions]
+      summary: Close resolution window (admin always; owner only when REFUSED)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Resolution updated to CLOSED
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResolutionDto'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /resolutions/{id}/resolve-escalation:
+    put:
+      tags: [Resolutions]
+      summary: Admin resolves an escalated dispute
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResolveEscalationRequest'
+      responses:
+        '200':
+          description: Escalation resolved (MANDATORY_PAYMENT or CLOSED)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResolutionDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'

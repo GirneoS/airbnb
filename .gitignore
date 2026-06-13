@@ -11,3 +11,5 @@ mvnw.cmd
 /.mvn
 
 /.idea
+docs
+*.iml
