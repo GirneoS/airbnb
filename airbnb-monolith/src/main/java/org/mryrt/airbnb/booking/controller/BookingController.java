@@ -21,9 +21,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-/**
- * API заявок на бронирование (бронирований).
- */
 @RestController
 @RequestMapping("/bookings")
 @RequiredArgsConstructor
@@ -31,14 +28,12 @@ public class BookingController {
 
     private final BookingService bookingService;
 
-    /** Создаёт заявку на бронирование от имени текущего пользователя (гостя). */
     @PostMapping
     @PreAuthorize("hasAuthority('BOOKING_CREATE')")
     public ResponseEntity<BookingDto> create(@Valid @RequestBody CreateBookingRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(bookingService.create(request));
     }
 
-    /** Возвращает страницу бронирований с фильтром и сортировкой. */
     @GetMapping
     @PreAuthorize("hasAuthority('BOOKING_READ') or hasAuthority('ALL_BOOKING_READ')")
     public ResponseEntity<Page<BookingDto>> getAll(
@@ -47,14 +42,12 @@ public class BookingController {
         return ResponseEntity.ok(bookingService.getAll(filter, pageable));
     }
 
-    /** Возвращает бронирование по id. */
     @GetMapping("/{id}")
     @PreAuthorize("hasAuthority('BOOKING_READ') or hasAuthority('ALL_BOOKING_READ')")
     public ResponseEntity<BookingDto> get(@PathVariable Long id) {
         return ResponseEntity.ok(bookingService.get(id));
     }
 
-    /** Решение владельца по заявке: одобрить или отклонить. */
     @PutMapping("/{id}/decide")
     @PreAuthorize("hasAuthority('BOOKING_DECIDE') or hasAuthority('ALL_BOOKING_UPDATE')")
     public ResponseEntity<BookingDto> decide(
@@ -63,14 +56,12 @@ public class BookingController {
         return ResponseEntity.ok(bookingService.decide(id, request));
     }
 
-    /** Фиксирует въезд гостя (перевод в статус CHECKED_IN). */
     @PutMapping("/{id}/check-in")
     @PreAuthorize("hasAuthority('BOOKING_READ') or hasAuthority('ALL_BOOKING_UPDATE')")
     public ResponseEntity<BookingDto> recordCheckIn(@PathVariable Long id) {
         return ResponseEntity.ok(bookingService.recordCheckIn(id));
     }
 
-    /** Фиксирует выезд гостя (перевод в статус CHECKED_OUT). */
     @PutMapping("/{id}/check-out")
     @PreAuthorize("hasAuthority('BOOKING_READ') or hasAuthority('ALL_BOOKING_UPDATE')")
     public ResponseEntity<BookingDto> recordCheckOut(@PathVariable Long id) {

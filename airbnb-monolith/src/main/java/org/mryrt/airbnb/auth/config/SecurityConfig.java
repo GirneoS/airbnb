@@ -64,10 +64,6 @@ public class SecurityConfig {
         return config.getAuthenticationManager();
     }
 
-    /**
-     * Dedicated AuthenticationManager that delegates only to the JAAS provider.
-     * Used by AuthController for username/password login.
-     */
     @Bean("jaasAuthenticationManager")
     public AuthenticationManager jaasAuthenticationManager() throws Exception {
         return new ProviderManager(jaasAuthenticationProvider());

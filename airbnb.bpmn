@@ -10,6 +10,8 @@
         <bpmn:flowNodeRef>Sys_NotifyGuest</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Activity_0txalis</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Activity_0jr0t65</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Sys_CreateBitrixDeal</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Sys_UpdateBitrixDecision</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Activity_15l0dit</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Activity_1n65xzp</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Activity_1dhrvk2</bpmn:flowNodeRef>
@@ -111,6 +113,10 @@
     </bpmn:serviceTask>
     <bpmn:serviceTask id="Activity_0jr0t65" name="Зарегистрировать заявку">
       <bpmn:incoming>Flow_0utc3oc</bpmn:incoming>
+      <bpmn:outgoing>Flow_CreateBitrixDeal</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="Sys_CreateBitrixDeal" name="Создать сделку в Bitrix24">
+      <bpmn:incoming>Flow_CreateBitrixDeal</bpmn:incoming>
       <bpmn:outgoing>Flow_13tt24x</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:receiveTask id="Activity_06px8tj" name="Получить уведомление">
@@ -119,8 +125,12 @@
     </bpmn:receiveTask>
     <bpmn:userTask id="Activity_1517h2c" name="Принять решение по заявке">
       <bpmn:incoming>Flow_0ggjvhu</bpmn:incoming>
-      <bpmn:outgoing>Flow_0g1dbwe</bpmn:outgoing>
+      <bpmn:outgoing>Flow_UpdateBitrixDecision</bpmn:outgoing>
     </bpmn:userTask>
+    <bpmn:serviceTask id="Sys_UpdateBitrixDecision" name="Сохранить решение и обновить сделку в Bitrix24">
+      <bpmn:incoming>Flow_UpdateBitrixDecision</bpmn:incoming>
+      <bpmn:outgoing>Flow_0g1dbwe</bpmn:outgoing>
+    </bpmn:serviceTask>
     <bpmn:exclusiveGateway id="Gateway_1gugo4m" name="Одобрить?">
       <bpmn:incoming>Flow_0g1dbwe</bpmn:incoming>
       <bpmn:outgoing>Flow_1ejtifz</bpmn:outgoing>
@@ -150,7 +160,7 @@
       <bpmn:outgoing>Flow_1ql2qqg</bpmn:outgoing>
       <bpmn:outgoing>Flow_19x0pco</bpmn:outgoing>
     </bpmn:userTask>
-    <bpmn:serviceTask id="Activity_1dhrvk2" name="Зарегистрировать въезд">
+    <bpmn:serviceTask id="Activity_1dhrvk2" name="Зарегистрировать въезд и обновить сделку в Bitrix24">
       <bpmn:incoming>Flow_1ql2qqg</bpmn:incoming>
       <bpmn:outgoing>Flow_0kd2w4l</bpmn:outgoing>
     </bpmn:serviceTask>
@@ -161,7 +171,7 @@
       <bpmn:incoming>Flow_0kd2w4l</bpmn:incoming>
       <bpmn:outgoing>Flow_18simb6</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:serviceTask id="Activity_1xotiem" name="Зарегистрировать выезд">
+    <bpmn:serviceTask id="Activity_1xotiem" name="Зарегистрировать выезд и обновить сделку в Bitrix24">
       <bpmn:incoming>Flow_1gq9gsv</bpmn:incoming>
       <bpmn:outgoing>Flow_0qxx33z</bpmn:outgoing>
       <bpmn:outgoing>Flow_00tgyi1</bpmn:outgoing>
@@ -294,10 +304,12 @@
     <bpmn:sequenceFlow id="Flow_0i19hyj" sourceRef="Activity_0jlb1y7" targetRef="Activity_1qvf11h" />
     <bpmn:sequenceFlow id="Flow_0vbrze0" sourceRef="Activity_1qvf11h" targetRef="Activity_1v216a5" />
     <bpmn:sequenceFlow id="Flow_0utc3oc" sourceRef="Activity_1v216a5" targetRef="Activity_0jr0t65" />
-    <bpmn:sequenceFlow id="Flow_13tt24x" sourceRef="Activity_0jr0t65" targetRef="Activity_0mbm8ir" />
+    <bpmn:sequenceFlow id="Flow_CreateBitrixDeal" sourceRef="Activity_0jr0t65" targetRef="Sys_CreateBitrixDeal" />
+    <bpmn:sequenceFlow id="Flow_13tt24x" sourceRef="Sys_CreateBitrixDeal" targetRef="Activity_0mbm8ir" />
     <bpmn:sequenceFlow id="Flow_1722b7o" sourceRef="Activity_0mbm8ir" targetRef="Activity_06px8tj" />
     <bpmn:sequenceFlow id="Flow_0ggjvhu" sourceRef="Activity_06px8tj" targetRef="Activity_1517h2c" />
-    <bpmn:sequenceFlow id="Flow_0g1dbwe" sourceRef="Activity_1517h2c" targetRef="Gateway_1gugo4m" />
+    <bpmn:sequenceFlow id="Flow_UpdateBitrixDecision" sourceRef="Activity_1517h2c" targetRef="Sys_UpdateBitrixDecision" />
+    <bpmn:sequenceFlow id="Flow_0g1dbwe" sourceRef="Sys_UpdateBitrixDecision" targetRef="Gateway_1gugo4m" />
     <bpmn:sequenceFlow id="Flow_1ejtifz" name="нет" sourceRef="Gateway_1gugo4m" targetRef="Activity_15l0dit" />
     <bpmn:sequenceFlow id="Flow_13p9a50" name="да" sourceRef="Gateway_1gugo4m" targetRef="Activity_1n65xzp" />
     <bpmn:sequenceFlow id="Flow_1744npg" sourceRef="Activity_15l0dit" targetRef="Activity_0fgtvuy" />
@@ -457,12 +469,20 @@
         <dc:Bounds x="1220" y="297" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Sys_CreateBitrixDeal_di" bpmnElement="Sys_CreateBitrixDeal">
+        <dc:Bounds x="1350" y="297" width="140" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="BPMNShape_0mtii24" bpmnElement="Activity_06px8tj">
         <dc:Bounds x="1520" y="547" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="BPMNShape_0ac6m8o" bpmnElement="Activity_1517h2c">
         <dc:Bounds x="1690" y="547" width="140" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Sys_UpdateBitrixDecision_di" bpmnElement="Sys_UpdateBitrixDecision">
+        <dc:Bounds x="1690" y="297" width="140" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Gateway_1gugo4m_di" bpmnElement="Gateway_1gugo4m" isMarkerVisible="true">
@@ -782,8 +802,12 @@
         <di:waypoint x="1270" y="757" />
         <di:waypoint x="1270" y="377" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_13tt24x_di" bpmnElement="Flow_13tt24x">
+      <bpmndi:BPMNEdge id="Flow_CreateBitrixDeal_di" bpmnElement="Flow_CreateBitrixDeal">
         <di:waypoint x="1320" y="337" />
+        <di:waypoint x="1350" y="337" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_13tt24x_di" bpmnElement="Flow_13tt24x">
+        <di:waypoint x="1490" y="337" />
         <di:waypoint x="1520" y="337" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1722b7o_di" bpmnElement="Flow_1722b7o">
@@ -794,9 +818,13 @@
         <di:waypoint x="1620" y="587" />
         <di:waypoint x="1690" y="587" />
       </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_UpdateBitrixDecision_di" bpmnElement="Flow_UpdateBitrixDecision">
+        <di:waypoint x="1760" y="547" />
+        <di:waypoint x="1760" y="377" />
+      </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0g1dbwe_di" bpmnElement="Flow_0g1dbwe">
-        <di:waypoint x="1830" y="587" />
-        <di:waypoint x="1863" y="587" />
+        <di:waypoint x="1830" y="337" />
+        <di:waypoint x="1863" y="337" />
         <di:waypoint x="1863" y="577" />
         <di:waypoint x="1895" y="577" />
       </bpmndi:BPMNEdge>

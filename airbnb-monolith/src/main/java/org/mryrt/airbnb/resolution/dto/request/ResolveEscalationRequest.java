@@ -11,6 +11,5 @@ import lombok.Setter;
 @AllArgsConstructor
 public class ResolveEscalationRequest {
 
-    /** true — существенное происшествие, назначить гостю обязательную выплату; false — урегулировать без взыскания, уведомить владельца. */
     private Boolean substantialIncident;
 }

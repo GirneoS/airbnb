@@ -22,9 +22,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-/**
- * API объявлений о сдаче жилья (листингов).
- */
+
 @RestController
 @RequestMapping("/listings")
 @RequiredArgsConstructor
@@ -32,14 +30,12 @@ public class ListingController {
 
     private final ListingService listingService;
 
-    /** Создаёт объявление от имени текущего пользователя (владельца). */
     @PostMapping
     @PreAuthorize("hasAuthority('LISTING_CREATE')")
     public ResponseEntity<ListingDto> create(@Valid @RequestBody CreateListingRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(listingService.create(request));
     }
 
-    /** Возвращает страницу объявлений с фильтром и сортировкой. */
     @GetMapping
     @PreAuthorize("hasAuthority('LISTING_READ') or hasAuthority('ALL_LISTING_READ')")
     public ResponseEntity<Page<ListingDto>> getAll(
@@ -48,14 +44,12 @@ public class ListingController {
         return ResponseEntity.ok(listingService.getAll(filter, pageable));
     }
 
-    /** Возвращает объявление по id. */
     @GetMapping("/{id}")
     @PreAuthorize("hasAuthority('LISTING_READ') or hasAuthority('ALL_LISTING_READ')")
     public ResponseEntity<ListingDto> get(@PathVariable Long id) {
         return ResponseEntity.ok(listingService.get(id));
     }
 
-    /** Обновляет объявление (заголовок, описание, статус). */
     @PutMapping("/{id}")
     @PreAuthorize("hasAuthority('LISTING_UPDATE') or hasAuthority('ALL_LISTING_UPDATE')")
     public ResponseEntity<ListingDto> update(
@@ -64,7 +58,6 @@ public class ListingController {
         return ResponseEntity.ok(listingService.update(id, request));
     }
 
-    /** Удаляет объявление. */
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAuthority('LISTING_DELETE') or hasAuthority('ALL_LISTING_DELETE')")
     public ResponseEntity<ListingDto> delete(@PathVariable Long id) {

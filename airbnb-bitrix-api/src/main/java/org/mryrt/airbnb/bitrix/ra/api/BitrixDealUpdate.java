@@ -12,6 +12,11 @@ public class BitrixDealUpdate implements Serializable {
         this.comments = comments;
     }
 
-    public String getStageId() { return stageId; }
-    public String getComments() { return comments; }
+    public String getStageId() {
+        return stageId;
+    }
+
+    public String getComments() {
+        return comments;
+    }
 }

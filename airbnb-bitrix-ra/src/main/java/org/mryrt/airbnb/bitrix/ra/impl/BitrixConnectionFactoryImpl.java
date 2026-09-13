@@ -33,8 +33,12 @@ public class BitrixConnectionFactoryImpl implements BitrixConnectionFactory, Ref
     }
 
     @Override
-    public Reference getReference() { return reference; }
+    public Reference getReference() {
+        return reference;
+    }
 
     @Override
-    public void setReference(Reference reference) { this.reference = reference; }
+    public void setReference(Reference reference) {
+        this.reference = reference;
+    }
 }

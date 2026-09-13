@@ -19,10 +19,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-/**
- * JAAS LoginModule that authenticates users against an XML credentials file.
- * Passwords in the XML must be BCrypt-encoded.
- */
 public class XmlFileLoginModule implements LoginModule {
 
     private Subject subject;

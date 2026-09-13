@@ -41,11 +41,9 @@ public class Booking extends AuditableEntity {
     @Builder.Default
     private BookingStatus status = BookingStatus.APPLIED;
 
-    /** Дата заезда (включительно). В дату выезда может заехать следующий гость. */
     @Column(name = "check_in_date", nullable = false)
     private LocalDate checkInDate;
 
-    /** Дата выезда (включительно; ночь перед этой датой — последняя занятая). В эту дату может заехать другой. */
     @Column(name = "check_out_date", nullable = false)
     private LocalDate checkOutDate;
 

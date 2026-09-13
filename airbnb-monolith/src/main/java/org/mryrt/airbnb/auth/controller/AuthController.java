@@ -27,9 +27,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Map;
 
-/**
- * API аутентификации и работы с JWT (регистрация, вход, обновление и проверка токена, выход).
- */
 @Slf4j
 @RestController
 @RequestMapping("/auth")
@@ -43,7 +40,6 @@ public class AuthController {
     @Qualifier("jaasAuthenticationManager")
     private final AuthenticationManager jaasAuthenticationManager;
 
-    /** Регистрация нового пользователя (гостя) и выдача пары токенов. */
     @PostMapping("/register-user")
     public ResponseEntity<Map<String, String>> registerUser(@Valid @RequestBody UserRequest request) {
         log.info("Registering new user: {}", request.getUsername());
@@ -53,7 +49,6 @@ public class AuthController {
         return ResponseEntity.status(HttpStatus.CREATED).body(tokens);
     }
 
-    /** Регистрация нового владельца жилья (роли USER + OWNER) и выдача пары токенов. */
     @PostMapping("/register-owner")
     public ResponseEntity<Map<String, String>> registerOwner(@Valid @RequestBody UserRequest request) {
         log.info("Registering new owner: {}", request.getUsername());
@@ -63,7 +58,6 @@ public class AuthController {
         return ResponseEntity.status(HttpStatus.CREATED).body(tokens);
     }
 
-    /** Вход через JAAS (проверка по XML-файлу credentials), выдача пары JWT-токенов. */
     @PostMapping("/login")
     public ResponseEntity<Map<String, String>> login(@Valid @RequestBody LoginRequest request) {
         try {
@@ -79,7 +73,6 @@ public class AuthController {
         return ResponseEntity.ok(tokens);
     }
 
-    /** Обновление access-токена по refresh-токену. */
     @PostMapping("/refresh")
     public ResponseEntity<Map<String, String>> refresh(@Valid @RequestBody TokenRequest request) {
         log.info("Refreshing token");
@@ -87,7 +80,6 @@ public class AuthController {
         return ResponseEntity.ok(tokens);
     }
 
-    /** Выход: инвалидация токена и очистка контекста. */
     @PostMapping("/logout")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Void> logout(HttpServletRequest request) {
@@ -102,7 +94,6 @@ public class AuthController {
         return ResponseEntity.ok().build();
     }
 
-    /** Проверка валидности токена и возврат имени пользователя при успехе. */
     @PostMapping("/validate")
     public ResponseEntity<Map<String, Object>> validateToken(@Valid @RequestBody TokenRequest request) {
         boolean isValid = jwtService.validateToken(request.getToken());

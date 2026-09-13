@@ -13,9 +13,6 @@ public final class BookingSpecifications {
         return withFilter(filter, null);
     }
 
-    /**
-     * @param scopeUserId if non-null, restrict to bookings where user is guest or listing owner (for non-admin).
-     */
     public static Specification<Booking> withFilter(BookingFilter filter, Long scopeUserId) {
         Specification<Booking> base = Specification.<Booking>where(
                         filter == null || filter.getListingId() == null ? null : (root, q, cb) -> cb.equal(root.get("listingId"), filter.getListingId()))
@@ -31,7 +28,6 @@ public final class BookingSpecifications {
         return base.and(scopeForUser(scopeUserId));
     }
 
-    /** Bookings where user is guest or owner of the listing. */
     public static Specification<Booking> scopeForUser(Long userId) {
         return (root, query, cb) -> {
             Subquery<Long> ownerListingIds = query.subquery(Long.class);

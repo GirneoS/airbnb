@@ -12,9 +12,6 @@ public final class ResolutionSpecifications {
         return withFilter(filter, null);
     }
 
-    /**
-     * @param scopeBookingIds if non-null and non-empty, restrict to resolutions for these booking IDs (for non-admin).
-     */
     public static Specification<ResolutionWindow> withFilter(ResolutionFilter filter, List<Long> scopeBookingIds) {
         Specification<ResolutionWindow> base = Specification.<ResolutionWindow>where(
                         filter == null || filter.getBookingId() == null ? null : (root, q, cb) -> cb.equal(root.get("bookingId"), filter.getBookingId()))

@@ -22,9 +22,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-/**
- * API окна разрешения споров после выезда (запрос компенсации, жалоба, эскалация).
- */
 @RestController
 @RequestMapping("/resolutions")
 @RequiredArgsConstructor
@@ -32,14 +29,12 @@ public class ResolutionController {
 
     private final ResolutionService resolutionService;
 
-    /** Открывает окно разрешения споров для бронирования (после выезда). */
     @PostMapping("/open/{bookingId}")
     @PreAuthorize("hasAuthority('RESOLUTION_OPEN') or hasAuthority('ALL_RESOLUTION_UPDATE')")
     public ResponseEntity<ResolutionDto> openForBooking(@PathVariable Long bookingId) {
         return ResponseEntity.status(HttpStatus.CREATED).body(resolutionService.openForBooking(bookingId));
     }
 
-    /** Возвращает страницу окон разрешения с фильтром и сортировкой. */
     @GetMapping
     @PreAuthorize("hasAuthority('RESOLUTION_READ') or hasAuthority('ALL_RESOLUTION_READ')")
     public ResponseEntity<Page<ResolutionDto>> getAll(
@@ -48,21 +43,18 @@ public class ResolutionController {
         return ResponseEntity.ok(resolutionService.getAll(filter, pageable));
     }
 
-    /** Возвращает окно разрешения по id. */
     @GetMapping("/{id}")
     @PreAuthorize("hasAuthority('RESOLUTION_READ') or hasAuthority('ALL_RESOLUTION_READ')")
     public ResponseEntity<ResolutionDto> get(@PathVariable Long id) {
         return ResponseEntity.ok(resolutionService.get(id));
     }
 
-    /** Возвращает окно разрешения по id бронирования. */
     @GetMapping("/booking/{bookingId}")
     @PreAuthorize("hasAuthority('RESOLUTION_READ') or hasAuthority('ALL_RESOLUTION_READ')")
     public ResponseEntity<ResolutionDto> getByBookingId(@PathVariable Long bookingId) {
         return ResponseEntity.ok(resolutionService.getByBookingId(bookingId));
     }
 
-    /** Запрос владельца на материальную компенсацию с гостя. */
     @PutMapping("/{id}/request-money")
     @PreAuthorize("hasAuthority('RESOLUTION_REQUEST_MONEY') or hasAuthority('ALL_RESOLUTION_UPDATE')")
     public ResponseEntity<ResolutionDto> requestMoney(
@@ -71,28 +63,24 @@ public class ResolutionController {
         return ResponseEntity.ok(resolutionService.requestMoney(id, request));
     }
 
-    /** Ответ гостя: согласие на оплату (конфликт урегулирован). */
     @PutMapping("/{id}/respond-pay")
     @PreAuthorize("hasAuthority('RESOLUTION_RESPOND') or hasAuthority('ALL_RESOLUTION_UPDATE')")
     public ResponseEntity<ResolutionDto> respondPay(@PathVariable Long id) {
         return ResponseEntity.ok(resolutionService.respondPay(id));
     }
 
-    /** Ответ гостя: отказ от оплаты. */
     @PutMapping("/{id}/respond-refuse")
     @PreAuthorize("hasAuthority('RESOLUTION_RESPOND') or hasAuthority('ALL_RESOLUTION_UPDATE')")
     public ResponseEntity<ResolutionDto> respondRefuse(@PathVariable Long id) {
         return ResponseEntity.ok(resolutionService.respondRefuse(id));
     }
 
-    /** Владелец просит вмешательства (эскалация после отказа гостя). */
     @PutMapping("/{id}/escalate")
     @PreAuthorize("hasAuthority('RESOLUTION_ESCALATE') or hasAuthority('ALL_RESOLUTION_UPDATE')")
     public ResponseEntity<ResolutionDto> escalate(@PathVariable Long id) {
         return ResponseEntity.ok(resolutionService.escalate(id));
     }
 
-    /** Владелец подаёт жалобу на гостя (фиксация без запроса денег). */
     @PutMapping("/{id}/complaint")
     @PreAuthorize("hasAuthority('RESOLUTION_COMPLAINT') or hasAuthority('ALL_RESOLUTION_UPDATE')")
     public ResponseEntity<ResolutionDto> recordComplaint(
@@ -101,14 +89,12 @@ public class ResolutionController {
         return ResponseEntity.ok(resolutionService.recordComplaint(id, request));
     }
 
-    /** Закрытие окна разрешения: админ — всегда; владелец — только из статуса REFUSED (закрыть без эскалации). */
     @PutMapping("/{id}/close")
     @PreAuthorize("hasAuthority('RESOLUTION_READ') or hasAuthority('ALL_RESOLUTION_UPDATE')")
     public ResponseEntity<ResolutionDto> close(@PathVariable Long id) {
         return ResponseEntity.ok(resolutionService.close(id));
     }
 
-    /** Решение по эскалации (только админ): существенное происшествие — да (назначить обязательную выплату гостю) или нет (урегулировать без взыскания, уведомить владельца). */
     @PutMapping("/{id}/resolve-escalation")
     @PreAuthorize("hasAuthority('ALL_RESOLUTION_UPDATE')")
     public ResponseEntity<ResolutionDto> resolveEscalation(

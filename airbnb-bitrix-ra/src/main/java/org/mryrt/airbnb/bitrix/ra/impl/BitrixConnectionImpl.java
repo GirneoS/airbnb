@@ -32,11 +32,11 @@ public class BitrixConnectionImpl implements BitrixConnection {
         }
     }
 
-    void associate(BitrixManagedConnection managedConnection) {
+    public void associate(BitrixManagedConnection managedConnection) {
         this.managedConnection = managedConnection;
     }
 
-    void invalidate() {
+    public void invalidate() {
         managedConnection = null;
     }
 

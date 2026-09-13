@@ -25,9 +25,23 @@ public class BitrixDealRequest implements Serializable {
         this.currencyId = currencyId;
     }
 
-    public String getTitle() { return title; }
-    public String getStageId() { return stageId; }
-    public String getComments() { return comments; }
-    public BigDecimal getOpportunity() { return opportunity; }
-    public String getCurrencyId() { return currencyId; }
+    public String getTitle() {
+        return title;
+    }
+
+    public String getStageId() {
+        return stageId;
+    }
+
+    public String getComments() {
+        return comments;
+    }
+
+    public BigDecimal getOpportunity() {
+        return opportunity;
+    }
+
+    public String getCurrencyId() {
+        return currencyId;
+    }
 }

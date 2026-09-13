@@ -27,7 +27,6 @@ import java.util.stream.Collectors;
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
-	// @Valid exception handler
 	@ExceptionHandler(MethodArgumentNotValidException.class)
 	public ResponseEntity<ErrorResponse> handleValidationExceptions(MethodArgumentNotValidException ex) {
 		List<String> fieldOrder = ClassFieldOrderUtil.getFieldOrderFromClass(ex.getParameter());
@@ -42,7 +41,6 @@ public class GlobalExceptionHandler {
 		return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
 	}
 
-	// Custom ServiceException handler
 	@ExceptionHandler(ServiceException.class)
 	public ResponseEntity<ErrorResponse> handleServiceException(ServiceException ex) {
 		List<ErrorResponse.ErrorDetail> errorDetails = Collections.singletonList(ErrorResponse.ErrorDetail.builder().field("service").message(ex.getMessage()).rejectedValue(null).errorType("SERVICE_ERROR").build());
@@ -52,7 +50,6 @@ public class GlobalExceptionHandler {
 		return new ResponseEntity<>(errorResponse, ex.getHttpStatus());
 	}
 
-	// Argument type mismatch handler
 	@ExceptionHandler(MethodArgumentTypeMismatchException.class)
 	public ResponseEntity<ErrorResponse> handleTypeMismatch(MethodArgumentTypeMismatchException ex) {
 		List<ErrorResponse.ErrorDetail> errorDetails = Collections.singletonList(ErrorResponse.ErrorDetail.builder().field(ex.getName()).message(String.format("Некорректный тип параметра. Ожидается: %s", ex.getRequiredType() != null ? ex.getRequiredType().getSimpleName() : "unknown")).rejectedValue(ex.getValue()).errorType("TYPE_MISMATCH").build());
@@ -62,7 +59,6 @@ public class GlobalExceptionHandler {
 		return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
 	}
 
-	// Missing argument handler
 	@ExceptionHandler(MissingServletRequestParameterException.class)
 	public ResponseEntity<ErrorResponse> handleMissingParams(MissingServletRequestParameterException ex) {
 		List<ErrorResponse.ErrorDetail> errorDetails = Collections.singletonList(ErrorResponse.ErrorDetail.builder().field(ex.getParameterName()).message("Обязательный параметр отсутствует").rejectedValue(null).errorType("MISSING_PARAMETER").build());
@@ -72,7 +68,6 @@ public class GlobalExceptionHandler {
 		return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
 	}
 
-	// Security Service exception handler
 	@ExceptionHandler(AccessDeniedException.class)
 	public ResponseEntity<ErrorResponse> handleAccessDenied(AccessDeniedException ignored) {
 		List<ErrorResponse.ErrorDetail> errorDetails = Collections.singletonList(ErrorResponse.ErrorDetail.builder().field("security").message("Нет необходимых прав на доступ к методу").rejectedValue(null).errorType("ACCESS_DENIED").build());
@@ -82,7 +77,6 @@ public class GlobalExceptionHandler {
 		return new ResponseEntity<>(errorResponse, HttpStatus.UNAUTHORIZED);
 	}
 
-	// Json exception handler
 	@ExceptionHandler(HttpMessageNotReadableException.class)
 	public ResponseEntity<ErrorResponse> handleHttpMessageNotReadable(HttpMessageNotReadableException ex) {
 		String message = "Некорректный формат JSON";
@@ -109,7 +103,6 @@ public class GlobalExceptionHandler {
 		return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
 	}
 
-	// Base exception handler
 	@ExceptionHandler(Exception.class)
 	public ResponseEntity<ErrorResponse> handleGenericException(Exception e) {
 		List<ErrorResponse.ErrorDetail> errorDetails = Collections.singletonList(ErrorResponse.ErrorDetail.builder().field("system").message("Внутренняя ошибка сервера").rejectedValue(null).errorType("INTERNAL_ERROR").build());

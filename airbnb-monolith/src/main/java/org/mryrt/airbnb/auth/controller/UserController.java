@@ -23,9 +23,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-/**
- * API управления пользователями (список, текущий пользователь, права, обновление, роли, удаление).
- */
 @Slf4j
 @RestController
 @RequestMapping("/users")
@@ -34,7 +31,6 @@ public class UserController {
 
     private final UserService userService;
 
-    /** Возвращает страницу пользователей с фильтром и сортировкой. */
     @GetMapping
     @PreAuthorize("hasAuthority('ALL_USER_READ')")
     public ResponseEntity<Page<UserDto>> getAllUsers(
@@ -44,7 +40,6 @@ public class UserController {
         return ResponseEntity.ok(users);
     }
 
-    /** Возвращает данные текущего аутентифицированного пользователя. */
     @GetMapping("/me")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<UserDto> getCurrentUser() {
@@ -52,7 +47,6 @@ public class UserController {
         return ResponseEntity.ok(user);
     }
 
-    /** Возвращает список прав текущего пользователя. */
     @GetMapping("/permissions")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<List<String>> getPermissions() {
@@ -60,7 +54,6 @@ public class UserController {
         return ResponseEntity.ok(permissions);
     }
 
-    /** Возвращает пользователя по id. */
     @GetMapping("/{id}")
     @PreAuthorize("hasAuthority('ALL_USER_READ')")
     public ResponseEntity<UserDto> getUser(@PathVariable Long id) {
@@ -68,7 +61,6 @@ public class UserController {
         return ResponseEntity.ok(user);
     }
 
-    /** Возвращает пользователя по имени. */
     @GetMapping("/username/{username}")
     @PreAuthorize("hasAuthority('ALL_USER_READ')")
     public ResponseEntity<UserDto> getUserByUsername(@PathVariable String username) {
@@ -76,7 +68,6 @@ public class UserController {
         return ResponseEntity.ok(user);
     }
 
-    /** Обновляет профиль пользователя (имя, пароль). */
     @PutMapping("/{id}")
     @PreAuthorize("hasAuthority('ALL_USER_UPDATE')")
     public ResponseEntity<UserDto> updateUser(
@@ -86,7 +77,6 @@ public class UserController {
         return ResponseEntity.ok(updatedUser);
     }
 
-    /** Обновляет роли пользователя. */
     @PutMapping("/{id}/roles")
     @PreAuthorize("hasAuthority('ALL_USER_UPDATE')")
     public ResponseEntity<UserDto> updateUserRoles(
@@ -96,7 +86,6 @@ public class UserController {
         return ResponseEntity.ok(updatedUser);
     }
 
-    /** Удаляет пользователя. */
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAuthority('ALL_USER_DELETE')")
     public ResponseEntity<UserDto> deleteUser(@PathVariable Long id) {

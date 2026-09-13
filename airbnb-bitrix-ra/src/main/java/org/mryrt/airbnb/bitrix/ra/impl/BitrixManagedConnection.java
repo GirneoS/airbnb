@@ -76,10 +76,14 @@ public class BitrixManagedConnection implements ManagedConnection {
     }
 
     @Override
-    public void addConnectionEventListener(ConnectionEventListener listener) { listeners.add(listener); }
+    public void addConnectionEventListener(ConnectionEventListener listener) {
+        listeners.add(listener);
+    }
 
     @Override
-    public void removeConnectionEventListener(ConnectionEventListener listener) { listeners.remove(listener); }
+    public void removeConnectionEventListener(ConnectionEventListener listener) {
+        listeners.remove(listener);
+    }
 
     @Override
     public XAResource getXAResource() throws ResourceException {
@@ -94,20 +98,35 @@ public class BitrixManagedConnection implements ManagedConnection {
     @Override
     public ManagedConnectionMetaData getMetaData() {
         return new ManagedConnectionMetaData() {
-            public String getEISProductName() { return "Bitrix24 CRM"; }
-            public String getEISProductVersion() { return "REST API"; }
-            public int getMaxConnections() { return 0; }
-            public String getUserName() { return "webhook-user"; }
+            public String getEISProductName() {
+                return "Bitrix24 CRM";
+            }
+
+            public String getEISProductVersion() {
+                return "REST API";
+            }
+
+            public int getMaxConnections() {
+                return 0;
+            }
+
+            public String getUserName() {
+                return "webhook-user";
+            }
         };
     }
 
     @Override
-    public PrintWriter getLogWriter() { return logWriter; }
+    public PrintWriter getLogWriter() {
+        return logWriter;
+    }
 
     @Override
-    public void setLogWriter(PrintWriter logWriter) { this.logWriter = logWriter; }
+    public void setLogWriter(PrintWriter logWriter) {
+        this.logWriter = logWriter;
+    }
 
-    long createDeal(BitrixDealRequest request) throws ResourceException {
+    public long createDeal(BitrixDealRequest request) throws ResourceException {
         if (request == null || request.getTitle() == null || request.getTitle().isBlank()) {
             throw new ResourceException("Bitrix24 deal title is required");
         }
@@ -129,7 +148,7 @@ public class BitrixManagedConnection implements ManagedConnection {
         return response.get("result").getAsLong();
     }
 
-    void updateDeal(long dealId, BitrixDealUpdate request) throws ResourceException {
+    public void updateDeal(long dealId, BitrixDealUpdate request) throws ResourceException {
         if (dealId <= 0) {
             throw new ResourceException("Bitrix24 deal ID must be positive");
         }
@@ -146,14 +165,14 @@ public class BitrixManagedConnection implements ManagedConnection {
         invoke("crm.deal.update.json", body);
     }
 
-    void closeHandle(BitrixConnectionImpl handle) {
+    public void closeHandle(BitrixConnectionImpl handle) {
         handles.remove(handle);
         ConnectionEvent event = new ConnectionEvent(this, ConnectionEvent.CONNECTION_CLOSED);
         event.setConnectionHandle(handle);
         new ArrayList<>(listeners).forEach(listener -> listener.connectionClosed(event));
     }
 
-    BitrixManagedConnectionFactory getManagedConnectionFactory() {
+    public BitrixManagedConnectionFactory getManagedConnectionFactory() {
         return managedConnectionFactory;
     }
 
